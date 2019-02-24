@@ -2,20 +2,26 @@ package srithon.encryptor.encryption;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import srithon.encryptor.backend.Marker;
+import srithon.encryptor.backend.TaskHandler;
 import srithon.encryptor.scene.MainScene;
 
 public class Runner extends Application
 {
 	private static Stage stage;
 	
-	private static Thread secondaryThread;
+	private static TaskHandler handler;
 	
 	public static void main(String[] args)
 	{
 		if (args.length == 0)
+		{
+			handler = new TaskHandler();
+			
 			launch(args);
+		}
 		else
 		{
 			Handler.main(args);
@@ -24,42 +30,26 @@ public class Runner extends Application
 	
 	public void start(Stage primaryStage)
 	{
-		Runner.stage = primaryStage;
+		Runner.setStage(primaryStage);
 		
-		VBox mainSceneBox = new VBox();
-		
-		Scene mainScene = new MainScene(mainSceneBox);
+		Scene mainScene = new MainScene();
 		
 		primaryStage.setScene(mainScene);
 		
 		primaryStage.setTitle("Handler GUI");
 		
-		primaryStage.show();
-		 //primaryStage.show();
-		 
-		 //Handler.handleRaw(sourceFile, outputFile, false);
-		 
-		 /*BufferedReader reader = null;
-		 
-		 try {
-			reader = new BufferedReader(new FileReader(selectedFile));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		 
-		String currentLine = "";
-		while (currentLine != null)
+		primaryStage.setOnCloseRequest((WindowEvent e) ->
 		{
-			try {
-				currentLine = reader.readLine();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			System.out.println(currentLine);
-		}*/
+			handler.stop();
+			primaryStage.close();
+		});
+		
+		primaryStage.show();
+	}
+	
+	public static void setStage(Stage stage)
+	{
+		Runner.stage = stage;
 	}
 	
 	public static Stage getStage()
@@ -67,13 +57,8 @@ public class Runner extends Application
 		return stage;
 	}
 	
-	public static synchronized void setThreadRunnable(Runnable j)
+	public static void addTask(Marker j)
 	{
-		secondaryThread = new Thread(j);
-	}
-	
-	public static Thread getThread()
-	{
-		return secondaryThread;
+		handler.addTask(j);
 	}
 }

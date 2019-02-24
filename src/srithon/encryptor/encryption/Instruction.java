@@ -20,7 +20,7 @@ public class Instruction
 		this.type = type;
 	}
 	
-	public boolean execute()
+	public Boolean execute()
 	{
 		return Handler.handleRaw(in, out, type);
 	}
@@ -44,7 +44,7 @@ public class Instruction
 		split = out.getAbsolutePath().split("\\\\");
 		String outStr = split[split.length - 2] + File.separatorChar + split[split.length - 1];
 		
-		return ((type == null || type == true) ? "ENCRYPTING" : "DECRYPTING") + "\n"
+		return ((!(Boolean.FALSE.equals(type))) ? "ENCRYPTING" : "DECRYPTING") + "\n"
 				+ inStr + "\n"
 				+ outStr + "\n";
 	}

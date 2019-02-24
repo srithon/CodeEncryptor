@@ -8,16 +8,15 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Decryptor
 {
 	ArrayList<Character> replacedChars = new ArrayList<Character>();
 
-	public static boolean decrypt(String filePath, String outputPath, char[] key)
+	public static Boolean decrypt(String filePath, String outputPath, char[] key)
 	{
 		int k = Handler.handleKey(key);
-		boolean success = false;
+		Boolean success = Boolean.FALSE;
 		
 		filePath = filePath.trim();
 		outputPath = outputPath.trim();
@@ -32,6 +31,12 @@ public class Decryptor
 		{
 			e.printStackTrace();
 		}
+		
+		if (reader == null)
+		{
+			System.out.println("Reader is null!");
+			return false;
+		}
 
 		String currentLine = "";
 		
@@ -43,7 +48,7 @@ public class Decryptor
 			dir += tempDir[i];
 			dir += "\\";
 		}
-		
+
 		new File(dir).mkdirs();
 
 		BufferedWriter writer = null;
@@ -57,144 +62,171 @@ public class Decryptor
 			e1.printStackTrace();
 		}
 		
+		if (writer == null)
+		{
+			System.out.println("Writer is null!");
+			return false;
+		}
+
 		int numLine = 1;
 		char[] chars = new char[0];
-		//char[] checkSum = null;
-		long realCheckSum = 0;
+		long realCheckSum = 0; //TODO fix checksum
 		long experimentalCheckSum = 0;
 
-		all:
+		while (true)
 		{
-			while (true)
+			try
 			{
-				try
-				{
-					currentLine = reader.readLine();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-				
-				if (currentLine != null)
-				{
-					for (char x : chars)
-					{
-						try
-						{
-							writer.append(x);
-						}
-						catch (IOException e)
-						{
-							e.printStackTrace();
-						}
-					}
-					
-					if (numLine != 1)
-					{
-						try
-						{
-							writer.newLine();
-							writer.flush();
-						}
-						catch (IOException e)
-						{
-							
-						}
-					}
-				}
-				else
-				{
-					//if (checkSum != null)
-					if (realCheckSum != 0)
-					{
-						//String x = "";
-						
-						//long realCheckSum = Long.parseLong(String.valueOf(checkSum));
-						experimentalCheckSum -= Handler.checkSum(chars);
-						
-						//System.out.println("Needed - " + realCheckSum);
-						//System.out.println("Experimental - " + checkSumVal);
-						
-						success = realCheckSum == experimentalCheckSum;
-					}
-					
-					break;
-				}
+				currentLine = reader.readLine();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
 
-				chars = currentLine.toCharArray();
-				
-				if (Character.isDigit(chars[0]) || chars[0] == '-')
+			if (currentLine != null)
+			{
+				for (char x : chars)
 				{
 					try
 					{
-						realCheckSum = Long.parseLong(currentLine);
+						writer.append(x);
 					}
-					catch (NumberFormatException e)
+					catch (IOException e)
 					{
-						realCheckSum = 0;
+						e.printStackTrace();
 					}
 				}
-				
-				/*if (Character.isDigit(chars[0]) || chars[0] == '-')
+
+				if (numLine != 1)
 				{
-					checkSum = new char[chars.length];
-					
-					for (int x = 0; x < checkSum.length; x++)
+					try
 					{
-						checkSum[x] = chars[x];
+						writer.newLine();
+						writer.flush();
 					}
-				}*/
-				
+					catch (IOException e)
+					{
+						e.printStackTrace();
+					}
+				}
+			}
+			else
+			{
 				for (int i = 0; i < chars.length; i++)
 				{
-					if (!Character.isWhitespace(chars[i]))
+					if (!Character.isWhitespace(chars[i]))	
 					{
-						int charValue = ((36480 - (numLine * 10))
-								-
-								(((int) chars[i])
+						chars[i] = (char)
+								((36480 - (numLine * 10)) -
+									(((int) chars[i])
 										+ i
 										+ (chars.length * 2)
 										+ numLine
-										+ (i * (k / (int) (Math.pow(10, 3))) & (numLine * (k + (numLine * 6)))) % 10000
-										+ ((k / 9000) - ((int) Math.abs(~numLine) + (i * i)) % 10000)
+										+ (i * (k / (int) (Math.pow(10, 3))) & (numLine * (k + (numLine * 6)))) % Handler.WEIGHTING_A_CAP
+										+ ((k / 9000) - (Math.abs(~numLine) + (i * i)) % Handler.WEIGHTING_B_CAP) //fix the parentheses or no?
 										//+ Math.abs((int) (((4 * k) / numLine)) * (~k | (numLine * i) - ~numLine << (i % 4)))
 										* (1 + (numLine % 2))));
-						
-						if (charValue < 0)
-						{
-							charValue = 0 - charValue;
-						}
-						
-						chars[i] = (char) charValue;
 					}
 				}
 				
-				//System.out.println(experimentalCheckSum);
+				try
+				{
+					System.out.println(numLine);
+					
+					long actualCheckSum = Decryptor.decryptedCheckSum(chars, numLine);
+						
+					experimentalCheckSum -= Handler.checkSum(chars);
+					
+					success = actualCheckSum == experimentalCheckSum;
+				}
+				catch (NumberFormatException e)
+				{
+					success = null;
+				}
 				
-				experimentalCheckSum += Handler.checkSum(chars);
-				
-				numLine++;
+				break;
 			}
+
+			chars = currentLine.toCharArray();
+
+			for (int i = 0; i < chars.length; i++)
+			{
+				if (!Character.isWhitespace(chars[i]))
+				{
+					int charValue = ((36480 - (numLine * 10))
+							-
+							(((int) chars[i])
+									+ i
+									+ (chars.length * 2)
+									+ numLine
+									+ (i * (k / (int) (Math.pow(10, 3))) & (numLine * (k + (numLine * 6)))) % 10000
+									+ ((k / 9000) - (Math.abs(~numLine) + (i * i)) % 10000)
+									//+ Math.abs((int) (((4 * k) / numLine)) * (~k | (numLine * i) - ~numLine << (i % 4)))
+									* (1 + (numLine % 2))));
+
+					if (charValue < 0)
+					{
+						charValue = 0 - charValue;
+					}
+
+					chars[i] = (char) charValue;
+				}
+			}
+
+			experimentalCheckSum += Handler.checkSum(chars);
+
+			numLine++;
 		}
 		
-		try {
-			writer.close();
-			reader.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		try
+		{
+			if (writer != null)
+				writer.close();
+			if (reader != null)
+				reader.close();
+		}
+		catch (IOException e)
+		{
 			e.printStackTrace();
 		}
 		
 		return success;
 	}
-
-	/*public static void main(String[] args)
+	
+	public static long decryptedCheckSum(char[] chars, int numLine) throws NumberFormatException
 	{
-		//new Decryptor("C:\\Data\\Development\\Workspaces\\General\\CodeEncryptor\\testIO\\");
-		//new Decryptor(args[0], args[1]);
-		//new Decryptor("C:\\Data\\Development\\Workspaces\\General\\CodeEncryptor\\testIO\\testH\\CodeEncryptor\\enen.txt", "C:\\Data\\Development\\Workspaces\\General\\CodeEncryptor\\testIO\\testH\\CodeEncryptor\\ende.txt", new char[] {'a', 'b', 'c', 'd'});
-		//new Decryptor("C:\\Data\\Development\\Workspaces\\General\\CodeEncryptor\\testIO\\testC\\encrypted.txt",
-				//"C:\\Data\\Development\\Workspaces\\General\\CodeEncryptor\\testIO\\testC\\unencryptedOutput.txt");
-	}*/
+		for (int i = 0; i < chars.length; i++)
+		{
+			int charValue = ((28653 - (numLine * 6))
+					-
+					(((int) chars[i])
+							+ i
+							+ (chars.length * 2)
+							+ numLine
+							+ (i * (14327 / (int) (Math.pow(10, 3))) & (numLine * (60593 + (numLine * 6)))) % 10000
+							+ ((4500 / (i + 1)) - (Math.abs(~numLine) + (i * i)) % 10000)
+							* (2 + (numLine % 2))));
+
+			if (charValue < 0)
+			{
+				charValue = 0 - charValue;
+			}
+
+			chars[i] = (char) charValue;
+			
+			System.out.println(chars[i]);
+		}
+		
+		return Long.parseLong(String.valueOf(chars));
+	}
+	
+	public static void main(String[] args)
+	{
+		long checkSum = 50000L;
+		String encrypted = Encryptor.encryptedCheckSum(checkSum, 20);
+		System.out.println(encrypted);
+		long unencryptedCheckSum = Decryptor.decryptedCheckSum(encrypted.toCharArray(), 20);
+		System.out.println(unencryptedCheckSum);
+	}
 }
