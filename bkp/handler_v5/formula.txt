@@ -1,0 +1,45 @@
+hello mest
+herbert hoover
+hollister
+
+variables
+	index in line
+	index of line
+	ascii value of character
+	length of line
+
+char[i] = (char)(1280 - ((int) char[i])
+		+ i
+		+ (chars.length * 2)
+		* (1 + (numLine % 2))
+	
+encryptedASCII = (1280 - 10*numLine)
+	- (ASCII + index + (lineLength*2)
+	+ numLine
+	* (1 + (numLine % 2)
+(encryptedASCII - numLine) / ((1 + (numLine % 2) * (1280 - 10*numLine)) = - (ASCII + index + (lineLength * 2)
+- ((encryptedASCII - numLine) / ((1 + (numLine % 2) * (1280 - 10*numLine))) = ASCII + index + (lineLength * 2)
+-(encryptedASCII - numLine) / ((1 + (numLine % 2) * (1280 - 10*numLine)) - index - lineLength*2 = ASCII
+
+
+a : encryptedASCII
+b : numLine
+c : ASCII
+d : index
+e : lineLength
+
+(1280 - ASCII) + index + (lineLength * 2) * (1 + (numLine % 2)) = encryptedASCII
+1280 - ASCII + index + (lineLength * 2) * (1 + numLine % 2)) = encryptedASCII
+1280 + index + (lineLength * 2) * (1 + numLine % 2)) = encryptedASCII + ASCII
+1280 - encryptedASCII + index + (lineLength * 2) * (1 + numLine % 2)) = ASCII
+
+((1280 - (numLine * 10)) -
+								(((int) chars[i])
+									+ i
+									+ (chars.length * 2)
+									+ numLine
+									* (1 + (numLine % 2))));
+
+(1280 - (numLine * 10)) - (ASCII + index + (lineLength * 2) + numLine * (1 + (numLine % 2))) = encryptedASCII
+1280 - 10numLine = encryptedASCII + ASCII + index + (2*lL + nL * (1 + nL%2))
+(1280 - (numLine * 10)) - index - encryptedASCII - (2 * lineLength + numLine * (1 + numLine % 2))

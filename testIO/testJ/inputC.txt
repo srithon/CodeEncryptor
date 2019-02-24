@@ -1,0 +1,15 @@
+python code
+var = "hello this is python and we dont have types"
+var_2 = "also no semicolons"
+var_3 = "also we use underscores instead of camel case"
+
+print(var)
+print(var_2)
+print(var_3)
+
+if (len(var) > len(var_2)):
+	print(var)
+else
+	print(var_2)
+
+print("Done")

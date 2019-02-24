@@ -1,0 +1,21 @@
+path = C:\Data\Development\Workspaces\General\CodeEncryptor\testIO\testH\CodeEncryptor\
+
+--encrypt
+de.txt
+deen.txt
+
+en.txt
+enen.txt
+
+ha.txt
+haen.txt
+
+--decrypt
+deen.txt
+dede.txt
+
+enen.txt
+ende.txt
+
+haen.txt
+hade.txt

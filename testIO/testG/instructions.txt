@@ -1,0 +1,21 @@
+path = C:\Data\Development\Workspaces\General\CodeEncryptor\testIO\testG\
+
+--encrypt
+input\handler.txt
+output\handlerEN.txt
+
+input\encryptor.txt
+output\encryptorEN.txt
+
+input\decryptor.txt
+output\decryptorEN.txt
+
+--decrypt
+output\handlerEN.txt
+output\handlerDE.txt
+
+output\encryptorEN.txt
+output\encryptorDE.txt
+
+output\decryptorEN.txt
+output\decryptorDE.txt

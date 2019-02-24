@@ -1,0 +1,14 @@
+hello my name is
+class J
+{
+	private:
+		int CNT;
+	public:
+		void print();
+		void talk();
+		inline char getLetter()
+		{
+			return 'J';
+		}
+	protected:
+});

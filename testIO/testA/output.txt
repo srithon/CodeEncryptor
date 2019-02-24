@@ -1,0 +1,128 @@
+package srithon.encryptor;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+
+public class Encryptor
+{
+	ArrayList<Character> goneChars = new ArrayList<Character>(); 
+	
+	public Encryptor(String filePath)
+	{
+		File output = new File(filePath);
+		
+		BufferedReader reader = null;
+		BufferedWriter writer = null;
+		
+		try {
+			reader = new BufferedReader(new FileReader(filePath + "source.txt"));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try {
+			writer = new BufferedWriter(new FileWriter(filePath + "output.txt"));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		if (!output.exists())
+		{
+			try {
+				output.createNewFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		String currentLine = "";
+		
+		while (true)
+		{
+			try {
+				currentLine = reader.readLine();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			if (currentLine == null)
+				break;
+			
+			char[] chars = currentLine.toCharArray();
+			
+			for (int i = 0; i < chars.length; i+=2)
+			{
+				goneChars.add(chars[i]);
+				chars[i] = randomChar();
+			}
+			
+			/*String encryptedLine = "";
+			
+			for (char x : chars)
+			{
+				encryptedLine += x;
+			}*/
+			
+			for (char x : chars)
+			{
+				try {
+					writer.append(x);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			try {
+				writer.append('\n');
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static char randomChar()
+	{
+		return (char)(Math.random() * 256 + 60);
+	}
+	
+	public static void main(String[] args)
+	{
+		new Encryptor("");
+	}
+}
+
+ 
+ c e i n c t i r a . f d d i r a . f
+ d t i r a . e p a i i o u x t ; p a
+ i i e r p a i i r r p a i O e o i r
+ a i r L ; b l n p { a s h c > n a =
+ w r i C a r ; l E y r r i a F u t n
+ F ( e h B e R e d = l B e W e t = l
+ t { d = w f e a ( i e r l t u . " }
+ t ( e F d e o { T u g r d t b k r S
+ k c ; t { t = w f e i ( i r r l t t
+ . " } t ( x t 1 T u g r d t b k p t
+ c a ) i u t i ( { o u r e F ( a I c
+ i e O A - e e c c p t c a ) S n r L
+ " i ( e r r t e r e e i ) c E p n /
+ O t e a a l e i t T e f u n n n ) e
+ h ] a = r t e C A y o t = h . g + g
+ C s d a i c s a m r * i e y d e " o
+ a r e y d e ; o a r t { t a n ) c h
+ O e o { T u g r d t b k r S k c ; r
+ i . e ' ) c E p n / O t e a a l e i
+ t T e } l s i r n C ( t c ) t a m *
+ 6 6 u c a o m ( i ] g n E y r ) 
+

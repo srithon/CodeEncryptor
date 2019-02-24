@@ -1,0 +1,190 @@
+package srithon.encryptor;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+
+public class Encryptor
+{
+	ArrayList<Character> goneChars = new ArrayList<Character>(); 
+	
+	public Encryptor(String filePath, String outputPath)
+	{
+		File output = new File(outputPath);
+		
+		if (!output.exists())
+		{
+			String[] directoriesAndFileName = outputPath.split("\\\\");
+			String p = "";
+			
+			for (int i = 0; i < directoriesAndFileName.length - 1; i++)
+				p += directoriesAndFileName[i] + File.separator;
+			
+			if (!new File(p).exists())
+			{
+				new File(p).mkdir();
+			}
+		}
+		
+		if (!output.exists())
+		{
+			try {
+				output.createNewFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		BufferedReader reader = null;
+		BufferedWriter writer = null;
+		
+		try {
+			reader = new BufferedReader(new FileReader(filePath));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try {
+			writer = new BufferedWriter(new FileWriter(outputPath));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		String currentLine = "";
+		
+		while (true)
+		{
+			try {
+				currentLine = reader.readLine();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			if (currentLine == null)
+				break;
+			
+			char[] chars = currentLine.toCharArray();
+			
+			for (int i = 0; i < chars.length; i+=2)
+			{
+				if (Character.isWhitespace(chars[i]))
+					continue;
+				
+				goneChars.add(chars[i]);
+				chars[i] = randomChar();
+			}
+			
+			/*String encryptedLine = "";
+			
+			for (char x : chars)
+			{
+				encryptedLine += x;
+			}*/
+			
+			for (char x : chars)
+			{
+				try {
+					writer.append(x);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			try {
+				writer.newLine();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		try {
+			writer.newLine();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try
+		{
+			writer.append((char) 317);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		
+		for (int i = 0; i < goneChars.size(); i++)
+		{
+			if (i % 36 == 0)
+			{
+				try
+				{
+					writer.newLine();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+			
+			try
+			{
+				writer.append(goneChars.get(i));
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		/*for (char x : goneChars)
+		{
+			try {
+				writer.append(x);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}*/
+		
+		try {
+			writer.close();
+			reader.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static char randomChar()
+	{
+		char ret;
+		
+		do
+		{
+			ret = (char)(Math.random() * 256 + 60);
+		} while (Character.isWhitespace(ret));
+		
+		return ret;
+	}
+	
+	public static void main(String[] args)
+	{
+		//new Encryptor("C:\\Data\\Development\\Workspaces\\General\\CodeEncryptor\\testIO\\testC\\source.txt",
+			//	"C:\\Data\\Development\\Workspaces\\General\\CodeEncryptor\\testIO\\testC\\encrypted.txt");
+		//System.out.println((char) 317);
+		new Encryptor(args[0], args[1]);
+	}
+}

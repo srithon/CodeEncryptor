@@ -1,0 +1,70 @@
+package srithon.encryptor;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class Handler
+{
+	private static BufferedReader reader = null;
+	
+	public static void handle(String type)
+	{
+		String inputPath = "";
+		String outputPath = "";
+		
+		try
+		{
+			inputPath = reader.readLine();
+			outputPath = reader.readLine();
+		}
+		catch (IOException e)
+		{
+			
+		}
+		
+		if (type.contains("encrypt"))
+		{
+			new Encryptor(inputPath, outputPath);
+		}
+		else
+		{
+			new Decryptor(inputPath, outputPath);
+		}
+	}
+	
+	public static void main(String[] args)
+	{
+		try {
+			reader = new BufferedReader(new FileReader(args[0]));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String line = "";
+		
+		while (line != null)
+		{
+			try {
+				line = reader.readLine();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			while (line.trim().length() == 0)
+			{
+				try {
+					reader.readLine();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			handle(line);
+		}
+	}
+}

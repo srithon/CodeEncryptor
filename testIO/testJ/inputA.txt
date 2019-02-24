@@ -1,0 +1,14 @@
+hello my name is
+public class Jar
+{
+	public static void main(String[] args)
+	{
+		System.out.println("Println");
+		main(new String[] { "args" });
+	}
+	
+	public static void do()
+	{
+		//things...
+	}
+}
