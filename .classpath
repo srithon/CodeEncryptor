@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="export/decryptor_v1.1.jar"/>
+	<classpathentry kind="lib" path="export/decryptor_v1.jar"/>
+	<classpathentry kind="lib" path="export/encryptor_v1.1.jar"/>
+	<classpathentry kind="lib" path="export/encryptor_v1.jar"/>
+	<classpathentry kind="lib" path="export/handler_v1.jar"/>
+	<classpathentry kind="lib" path="export/handler_v2_5.jar"/>
+	<classpathentry kind="lib" path="export/handler_v2_6.jar"/>
+	<classpathentry kind="lib" path="export/handler_v2_7.jar"/>
+	<classpathentry kind="lib" path="export/handler_v2.jar"/>
+	<classpathentry kind="lib" path="export/handler_v3_1.jar"/>
+	<classpathentry kind="lib" path="export/handler_v3.jar"/>
+	<classpathentry kind="lib" path="export/handler_v4_1.jar"/>
+	<classpathentry kind="lib" path="export/handler_v4.jar"/>
+	<classpathentry kind="lib" path="export/handler_v5.jar"/>
+	<classpathentry kind="lib" path="export/handler_v5obfs.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
