@@ -78,10 +78,10 @@ public class Encryptor
 			}
 		}
 		
-		BufferedWriter writer = null;
+		FileOutputStream writer = null;
 		
 		try {
-			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath)));//, StandardCharsets.UTF_8));
+			writer = new FileOutputStream(outputPath);//, StandardCharsets.UTF_8));
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -147,19 +147,17 @@ public class Encryptor
         
         for (byte i : iv)
         {
-        	try
-        	{
-        		writer.write((char) i);
-        	}
-        	catch (IOException e)
-        	{
-        		
-        	}
+        	try {
+				writer.write((char) i);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         
         display("TAG", Arrays.copyOfRange(cipherText, 0, 16));
         
-        for (int i = 0; i < 16; i++)
+        for (int i = cipherText.length - 16; i < cipherText.length; i++)
         {
         	try {
 				writer.write((char) (cipherText[i] + 127));
@@ -169,7 +167,7 @@ public class Encryptor
 			}
         }
         
-        for (int i = 16; i < cipherText.length; i++)
+        for (int i = 0; i < cipherText.length - 16; i++)
         {
         	try {
 				writer.write((char) cipherText[i]);
@@ -247,9 +245,15 @@ public class Encryptor
 	    for (int i = 0; i < tag.length; i++)
 	    {
 	    	if (tag[i] < 0)
+	    	{
 				tag[i] = (byte) (256 + (tag[i] - 127));
+	    	}
 			else
+			{
 				tag[i] = (byte) (tag[i] - 127);
+			}
+	    	
+	    	encrypted[i] = tag[i];
 	    }
 	    
 	    display("IV", iv);
@@ -276,6 +280,8 @@ public class Encryptor
         byte[] decrypted = null;
         
         byte[] encryptedText = Arrays.copyOfRange(encrypted, 28, encrypted.length);
+        
+        display("ENC", encryptedText);
         
         try
         {
