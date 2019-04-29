@@ -1,5 +1,10 @@
 package srithon.encryptor.scene;
 
+import java.nio.charset.StandardCharsets;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -28,10 +33,12 @@ public class KeyPrompt
 		window = new Stage();
 		
 		window.setTitle("Key");
-		window.setMinWidth(575);
-		window.setMinHeight(200);
-		window.setMaxHeight(575);
-		window.setMaxWidth(575);
+		
+		window.setMinWidth(1000);
+		window.setMinHeight(100);
+		window.setMaxHeight(300);
+		window.setMaxWidth(1250);
+		
 		window.initModality(Modality.APPLICATION_MODAL);
 	}
 	
@@ -42,12 +49,13 @@ public class KeyPrompt
 	
 	public static void prompt()
 	{
-		Label[] characters = new Label[10];
+		Label[] characters = new Label[16];
 		
 		Font labelFont = new Font("Times New Roman", 48);
 		
 		HBox box = new HBox(10);
-		box.setMaxSize(575, 575);
+		box.setMaxSize(1250, 400);
+		box.setMinSize(800, 150);
 		box.setAlignment(Pos.CENTER);
 		
 		for (int i = 0; i < characters.length; i++)
@@ -100,33 +108,43 @@ public class KeyPrompt
 		
 		sc.setOnKeyTyped((KeyEvent press) ->
 		{
-			if (press.getCode().equals(KeyCode.DELETE) && currentChar > 0)
+			String character = press.getCharacter();
+			char characterChar = character.charAt(0);
+			int keyCode = (int) characterChar;
+			System.out.println("KeyChar: " + character);
+			System.out.println("Numeric Value: " + (int) characterChar);
+			
+			//delete button
+			if ((keyCode == 127) && currentChar > 0)
 			{
 				characters[--currentChar].setText("");
+				return;
+			}
+			else if (keyCode == 27) //escape key
+			{
+				if (characters[0].getText().contentEquals(KeyCode.ESCAPE.getChar()))
+				{
+					Handler.setKey(getKey(characters));
+					window.close();
+				}
+				
+				for (Label lab : characters)
+				{
+					lab.setText(KeyCode.ESCAPE.getChar());
+				}
+				
 				return;
 			}
 
 			if (currentChar < characters.length)
 			{
-				characters[currentChar++].setText(press.getCharacter());
+				characters[currentChar++].setText(character);
 			}
 		});
 		
 		window.setOnCloseRequest((WindowEvent closeRequest) ->
 		{
-			key = "";
-
-			StringBuilder builder = new StringBuilder();
-
-			for (int i = 0; i < currentChar; i++)
-			{
-				if (!characters[i].getText().equals(KeyCode.ESCAPE.getChar()))
-					builder.append(characters[i].getText());
-			}
-
-			key = builder.toString();
-			Handler.setKey(key.toCharArray());
-			System.out.println(key);
+			Handler.setKey(getKey(characters));
 			window.close();
 		});
 		
@@ -135,7 +153,7 @@ public class KeyPrompt
 		window.show();
 	}
 	
-	public static String getKey(Label[] characters)
+	public static SecretKeySpec getKey(Label[] characters)
 	{
 		String key = "";
 		
@@ -146,9 +164,22 @@ public class KeyPrompt
 			if (!characters[i].getText().equals(KeyCode.ESCAPE.getChar()))
 				builder.append(characters[i].getText());
 		}
+		for (int i = currentChar; i < 16; i++)
+		{
+			builder.append((char) (Math.pow(i, 2) % 128));
+		}
 		
 		key = builder.toString();
 		
-		return key;
+		System.out.println(key);
+		
+		SecretKeySpec retKey = new SecretKeySpec(String.valueOf(key).getBytes(StandardCharsets.UTF_8), "AES");
+		key = null;
+		return retKey;
+	}
+	
+	public static void main(String[] args)
+	{
+		prompt();
 	}
 }

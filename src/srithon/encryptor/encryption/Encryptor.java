@@ -1,45 +1,26 @@
 package srithon.encryptor.encryption;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.SecureRandom;
-import java.security.spec.KeySpec;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class Encryptor
 {
-	private static final byte[] iv;
 	private static final int GCM_TAG_LENGTH = 128;
 	
-	static
-	{
-		iv = new byte[16];
-		for (byte i = 0; i < iv.length; i++)
-		{
-			iv[i] = (byte)(i + 1);
-		}
-	}
-	
-	public static void encrypt(String filePath, String outputPath, char[] key, Boolean doCheckSum)
+	public static void encrypt(String filePath, String outputPath, SecretKeySpec key, Boolean doCheckSum)
 	{
 		filePath = filePath.trim();
 		outputPath = outputPath.trim();
@@ -106,9 +87,9 @@ public class Encryptor
 		
 		display("IV", iv);
 		
-		char[] fullKey = getFullKey(key);
+		//char[] fullKey = getFullKey(key);
 		
-		key = null;
+		//key = null;
 		
 		Cipher cipher = null;
 
@@ -126,7 +107,7 @@ public class Encryptor
         
         try
         {
-        	cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(String.valueOf(fullKey).getBytes(StandardCharsets.UTF_8), "AES"), new GCMParameterSpec(GCM_TAG_LENGTH, iv));
+        	cipher.init(Cipher.ENCRYPT_MODE, /*new SecretKeySpec(String.valueOf(fullKey).getBytes(StandardCharsets.UTF_8), "AES")*/key, new GCMParameterSpec(GCM_TAG_LENGTH, iv));
             //cipher.init(Cipher.ENCRYPT_MODE, getKey(fullKey));
         }
         catch (Exception e)
@@ -201,7 +182,7 @@ public class Encryptor
 		return iv;
 	}
 	
-	private static char[] getFullKey(char[] key)
+	public static char[] getFullKey(char[] key)
 	{
 		char[] fullKey = new char[16];
 		
@@ -213,7 +194,7 @@ public class Encryptor
 		return fullKey;
 	}
 
-    public static void decrypt(String encPath, String decPath, char[] key)
+    public static boolean decrypt(String encPath, String decPath, SecretKeySpec key)
     {
         Cipher cipher = null;
         try
@@ -225,9 +206,9 @@ public class Encryptor
             e.printStackTrace();
         }
         
-        char[] fullKey = getFullKey(key);
+        //char[] fullKey = getFullKey(key);
         
-        key = null;
+        //key = null;
         
         byte[] encrypted = null;
 		try {
@@ -235,6 +216,7 @@ public class Encryptor
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			return false;
 		}
 		
 		byte[] iv = Arrays.copyOfRange(encrypted, 0, 12);
@@ -263,11 +245,12 @@ public class Encryptor
 
         try
         {
-            cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(String.copyValueOf(fullKey).getBytes(StandardCharsets.UTF_8), "AES"), new GCMParameterSpec(GCM_TAG_LENGTH, iv));
+            cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(GCM_TAG_LENGTH, iv));
         }
         catch (Exception e)
         {
             e.printStackTrace();
+            return false;
         }
         
         /*byte[] encryptedWOIV = new byte[encrypted.length - 12];
@@ -292,6 +275,7 @@ public class Encryptor
         catch (Exception e)
         {
             e.printStackTrace();
+            return false;
         }
         
         File outputFile = new File(decPath);
@@ -321,6 +305,8 @@ public class Encryptor
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+        
+        return true;
 	}
 	
     private static void display(String name, byte[] ar)
@@ -335,76 +321,22 @@ public class Encryptor
 		System.out.println();
 	}
     
-	private static SecretKey getKey(char[] key)
+	private static SecretKeySpec getKey(char[] key)
     {
-        byte[] keyBytes = new byte[key.length];
-        
-        for (int i = 0; i < keyBytes.length; i++)
-        	keyBytes[i] = (byte) key[i];
-
-        return new SecretKeySpec(keyBytes, "AES");
+        return new SecretKeySpec(String.valueOf(key).getBytes(StandardCharsets.UTF_8), "AES");
     }
-	
-	public static String encryptedCheckSum(long checkSum, int numLine)
-	{
-		char[] chars = String.valueOf(checkSum).toCharArray();
-		
-		for (int i = 0; i < chars.length; i++)
-		{
-			chars[i] = (char)
-			((28653 - (numLine * 6)) -
-				(((int) chars[i])
-					+ i
-					+ (chars.length * 2)
-					+ numLine
-					+ (i * (14327 / (int) (Math.pow(10, 3))) & (numLine * (60593 + (numLine * 6)))) % 10000
-					+ ((4500 / (i + 1)) - (Math.abs(~numLine) + (i * i)) % 10000)
-					* (2 + (numLine % 2))));
-		}
-		
-		return String.valueOf(chars);
-	}
-	
-	/*public static void main(String[] args)
-	{
-		int k = 2927120;
-		int numLine = 179;
-		
-		k =0;
-		
-		for (int i = 0; i < 10; i++)
-		{
-			//System.out.println(Math.abs((int) (((4 * k) / numLine)) * (~k | (numLine * i) - ~numLine << (i % 4))));
-		
-			System.out.println((i * (k / (int) (Math.pow(10, 3))) & (numLine * (k + (numLine * 6)))) % 10000
-			+ ((k / 9000) - ((int) Math.abs(~numLine) + (i * i)) % 10000));//Math.abs((int) (((4 * k) / numLine)) * (~k | (numLine * i) - ~numLine << (i % 4)))
-			
-		}
-		
-		k = Handler.handleKey(new char[] { 'h', 'c', 'x', 'y' });
-		
-		System.out.println("NEW\n\n");
-		
-		for (int i = 0; i < 10; i++)
-		{
-			//System.out.println(Math.abs((int) (((4 * k) / numLine)) * (~k | (numLine * i) - ~numLine << (i % 4))));
-		
-			System.out.println((i * (k / (int) (Math.pow(10, 3))) & (numLine * (k + (numLine * 6))))
-			+ (k / 9000) - ((int) Math.abs(~numLine) + (i * i)));//Math.abs((int) (((4 * k) / numLine)) * (~k | (numLine * i) - ~numLine << (i % 4)))
-			
-		}
-	}*/
 	
 	public static void main(String[] args)
 	{
-		char[] key = new char[] { 'a', 'b', 'c' };
+		char[] key = new char[] { 'a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c', 'd' };
 		
 		String inputPath = "C:\\Development\\Java\\CodeEncryptor\\testIO\\testL\\input.txt";
 		String outputPath = "C:\\Development\\Java\\CodeEncryptor\\testIO\\testL\\output.txt";
-		encrypt(inputPath, outputPath, key, false);
+		encrypt(inputPath, outputPath, getKey(key), false);
 		
+		char[] altKey = new char[] { 'a', 'b' };
 		String encPath = "C:\\\\Development\\\\Java\\\\CodeEncryptor\\\\testIO\\\\testL\\\\output.txt";
 		String decPath = "C:\\\\Development\\\\Java\\\\CodeEncryptor\\\\testIO\\\\testL\\\\outputDec.txt";
-		decrypt(encPath, decPath, key);
+		decrypt(encPath, decPath, getKey(key));
 	}
 }

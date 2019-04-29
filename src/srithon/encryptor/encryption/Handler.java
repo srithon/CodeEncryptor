@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+import javax.crypto.spec.SecretKeySpec;
+
 public class Handler
 {
 	private static BufferedReader reader = null;
@@ -14,17 +16,11 @@ public class Handler
 
 	private static String path = null;
 	
-	private static char[] key;
-	
-	public static final int WEIGHTING_A_CAP;
-	public static final int WEIGHTING_B_CAP;
+	private static SecretKeySpec key;
 	
 	static
 	{
-		key = new char[0];
-		
-		WEIGHTING_A_CAP = 10000;
-		WEIGHTING_B_CAP = 10000;
+		key = null;
 	}
 	
 	public static void handle(String type)
@@ -81,7 +77,7 @@ public class Handler
 		}
 		else if (type.contains("decrypt"))
 		{
-			Decryptor.decrypt(inputPath, outputPath, key);
+			Encryptor.decrypt(inputPath, outputPath, key);
 		}
 		else
 		{
@@ -100,7 +96,7 @@ public class Handler
 		}
 		else
 		{
-			return Decryptor.decrypt(input.getAbsolutePath(), output.getAbsolutePath(), key);
+			return Encryptor.decrypt(input.getAbsolutePath(), output.getAbsolutePath(), key);
 		}
 	}
 	
@@ -194,7 +190,7 @@ public class Handler
 		return keyVal;
 	}
 	
-	public static void setKey(char[] key)
+	public static void setKey(SecretKeySpec key)
 	{
 		Handler.key = key;
 	}
