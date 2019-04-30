@@ -107,7 +107,7 @@ public class Encryptor
         
         try
         {
-        	cipher.init(Cipher.ENCRYPT_MODE, /*new SecretKeySpec(String.valueOf(fullKey).getBytes(StandardCharsets.UTF_8), "AES")*/key, new GCMParameterSpec(GCM_TAG_LENGTH, iv));
+        	cipher.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(GCM_TAG_LENGTH, iv));
             //cipher.init(Cipher.ENCRYPT_MODE, getKey(fullKey));
         }
         catch (Exception e)

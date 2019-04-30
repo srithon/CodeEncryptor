@@ -63,9 +63,12 @@ public class KeyPrompt
 			characters[i] = new Label((i < key.length() ? String.valueOf(key.charAt(i)) : KeyCode.ESCAPE.getChar()));
 			characters[i].setFont(labelFont);
 			characters[i].setMaxSize(52.5, 52.5);
+			System.out.print(characters[i].getText());
 			
 			box.getChildren().add(characters[i]);
 		}
+		
+		System.out.println();
 		
 		Scene sc = new Scene(box);
 		

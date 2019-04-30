@@ -17,6 +17,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import srithon.encryptor.encryption.Instruction;
 import srithon.encryptor.encryption.InstructionClickable;
 import srithon.encryptor.encryption.Runner;
+import srithon.encryptor.encryption.Handler;
 
 public class MainScene extends Scene
 {
@@ -92,6 +93,12 @@ public class MainScene extends Scene
 		
 		run.setOnAction((ActionEvent event) ->
 		{
+			if (!Handler.keyIsValid())
+			{
+				AlertBox.alert("Empty Password", "Close this window and press 'J' to open the password window");
+				return;
+			}
+			
 			ArrayList<Boolean> successes = new ArrayList<Boolean>();
 			
 			for (InstructionClickable x : queue)

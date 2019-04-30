@@ -87,6 +87,11 @@ public class Handler
 		lastType = type;
 	}
 	
+	public static boolean keyIsValid()
+	{
+		return key != null;
+	}
+	
 	public static Boolean handleRaw(File input, File output, Boolean encrypt)
 	{
 		if (Boolean.TRUE.equals(encrypt) || (encrypt == null))

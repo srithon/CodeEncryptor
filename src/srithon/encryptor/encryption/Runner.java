@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import srithon.encryptor.backend.Marker;
 import srithon.encryptor.backend.TaskHandler;
+import srithon.encryptor.scene.AlertBox;
 import srithon.encryptor.scene.MainScene;
 
 public class Runner extends Application
