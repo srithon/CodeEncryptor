@@ -5,6 +5,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.crypto.spec.SecretKeySpec;
 
@@ -18,9 +23,18 @@ public class Handler
 	
 	private static SecretKeySpec key;
 	
+	private static List<String> imageExtensions;
+	
 	static
 	{
 		key = null;
+		
+		imageExtensions = new ArrayList<>(Arrays.asList("jpg", "jpeg", "png", "bmp", "tiff"));
+	}
+	
+	public static boolean isImage(String ext)
+	{
+		return imageExtensions.contains(ext.toLowerCase());
 	}
 	
 	public static void handle(String type)

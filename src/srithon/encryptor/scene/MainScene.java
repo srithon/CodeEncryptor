@@ -177,8 +177,8 @@ public class MainScene extends Scene
 			FileChooser fileChooser = new FileChooser();
 			fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
 			fileChooser.setTitle(titlePrefix + " - Open " + inputFileName + " File");
-			fileChooser.getExtensionFilters().addAll(
-					new ExtensionFilter("Text Files", "*.txt", "*.cpp", "*.h", "*.java", "*.c"));
+			//fileChooser.getExtensionFilters().addAll(
+			//		new ExtensionFilter("Text Files", "*.txt", "*.cpp", "*.h", "*.java", "*.c"));
 
 			File inputFile;
 			File outputFile;

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -59,13 +60,23 @@ public class Encryptor
 			}
 		}
 		
-		FileOutputStream writer = null;
+		OutputStream writer = null;
 		
-		try {
-			writer = new FileOutputStream(outputPath);//, StandardCharsets.UTF_8));
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		boolean isImage = false;
+		
+		if (!(isImage = Handler.isImage(outputPath.substring(outputPath.lastIndexOf('.') + 1))))
+		{
+			try {
+				writer = new FileOutputStream(outputPath);//, StandardCharsets.UTF_8));
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		else
+		{
+			System.out.println("ImageWriter");
+			writer = new EncryptedImageWriter(filePath, outputPath);
 		}
 		
 		if (writer == null)
