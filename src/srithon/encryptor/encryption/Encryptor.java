@@ -1,5 +1,6 @@
 package srithon.encryptor.encryption;
 
+import java.awt.image.DataBufferByte;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,6 +17,7 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.imageio.ImageIO;
 
 public class Encryptor
 {
@@ -87,11 +89,25 @@ public class Encryptor
 		
 		byte[] fileBytes = null;
 		
-		try {
-			fileBytes = Files.readAllBytes(Path.of(filePath));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (isImage)
+		{
+			try
+			{
+				fileBytes = ((DataBufferByte) ImageIO.read(new File(filePath)).getRaster().getDataBuffer()).getData();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		else
+		{
+			try {
+				fileBytes = Files.readAllBytes(Path.of(filePath));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		byte[] iv = getIV();
@@ -135,6 +151,14 @@ public class Encryptor
         catch (Exception e)
         {
             e.printStackTrace();
+        }
+        
+        System.out.println("Cipher Text Length: " + cipherText.length);
+        
+        if (isImage)
+        {
+        	// length and width
+        	
         }
         
         for (byte i : iv)
@@ -204,7 +228,7 @@ public class Encryptor
 		
 		return fullKey;
 	}
-
+	
     public static boolean decrypt(String encPath, String decPath, SecretKeySpec key)
     {
         Cipher cipher = null;
