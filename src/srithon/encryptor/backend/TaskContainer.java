@@ -7,8 +7,13 @@ public class TaskContainer implements Marker
 	
 	public TaskContainer(TaskObject... tasks)
 	{
-		this.tasks = tasks;
+		setTasks(tasks);
 		iter = new Iterator();
+	}
+	
+	public void setTasks(TaskObject[] tasks)
+	{
+		this.tasks = tasks;
 	}
 	
 	private class Iterator

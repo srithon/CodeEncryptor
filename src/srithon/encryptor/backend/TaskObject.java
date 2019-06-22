@@ -1,18 +1,19 @@
 package srithon.encryptor.backend;
 
-public abstract class TaskObject implements Task, Marker
+public class TaskObject implements Task, Marker
 {
 	private int times;
 	private Timer timer;
+	private Action action;
 	
-	public TaskObject()
+	public TaskObject(Action action)
 	{
+		this.action = action;
 		this.times = 1;
-		this.timer = new Timer(0, false);
-		this.timer.start();
 	}
-	public TaskObject(int times, int delay, boolean startWithDelay)
+	public TaskObject(int times, int delay, boolean startWithDelay, Action action)
 	{
+		this.action = action;
 		this.times = times;
 		this.timer = new Timer(delay, startWithDelay);
 		this.timer.start();
@@ -22,7 +23,7 @@ public abstract class TaskObject implements Task, Marker
 	{
 		if (times > 0)
 		{
-			execute();
+			action.act();
 			decrementTimes();
 		}
 		else
@@ -53,6 +54,8 @@ public abstract class TaskObject implements Task, Marker
 	
 	public boolean check()
 	{
+		if (timer == null)
+			return true;
 		return this.timer.check();
 	}
 }

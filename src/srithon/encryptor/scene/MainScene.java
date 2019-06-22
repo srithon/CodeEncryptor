@@ -17,6 +17,8 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import srithon.encryptor.encryption.Instruction;
 import srithon.encryptor.encryption.InstructionClickable;
 import srithon.encryptor.encryption.Runner;
+import srithon.encryptor.backend.TaskContainer;
+import srithon.encryptor.backend.TaskObject;
 import srithon.encryptor.encryption.Handler;
 
 public class MainScene extends Scene
@@ -99,14 +101,26 @@ public class MainScene extends Scene
 				return;
 			}
 			
+			TaskObject[] tasks = new TaskObject[queue.size() + 8];
 			ArrayList<Boolean> successes = new ArrayList<Boolean>();
 			
-			for (InstructionClickable x : queue)
+			Wrapper<Integer> integerWrapper = new Wrapper<>(0);
+			
+			//workaround
+			for (int i = 0; i < queue.size(); i++)
 			{
-				successes.add(x.execute());
+				tasks[i] = new TaskObject(() -> {
+					successes.add(queue.get(integerWrapper.getData()).execute());
+					integerWrapper.setData(integerWrapper.getData() + 1);
+				});
 			}
 			
-			InstructionClickable.flash(queue, successes);
+			TaskContainer flashContainer = InstructionClickable.flashContainer(queue, successes);
+			
+			for (int i = queue.size(); i < tasks.length; i++)
+				tasks[i] = flashContainer.getNext();
+			
+			Runner.addTask(new TaskContainer(tasks));
 		});
 		
 		this.setOnKeyPressed((KeyEvent keyPress) ->
@@ -217,6 +231,26 @@ public class MainScene extends Scene
 			queue.get(i).getText().clear();
 			queue.get(i).getText().setText("#" + (i + 1) + " - " + queue.get(i).getInstruction().toString());
 			listPaneBoxes[i / 3].getChildren().add(queue.get(i));
+		}
+	}
+	
+	private class Wrapper<E>
+	{
+		private E data;
+		
+		public Wrapper(E data)
+		{
+			this.data = data;
+		}
+		
+		public E getData()
+		{
+			return data;
+		}
+		
+		public void setData(E data)
+		{
+			this.data = data;
 		}
 	}
 }

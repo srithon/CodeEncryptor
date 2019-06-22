@@ -71,6 +71,8 @@ public class TaskHandler
 					
 					if (m.check())
 					{
+						System.out.println(m.getTimes());
+						
 						m.run();
 
 						if (m.getTimes() < 1)
@@ -82,14 +84,7 @@ public class TaskHandler
 							
 							m = null;
 
-							if (i == 0)
-							{
-								break;
-							}
-							else
-							{
-								i--;
-							}
+							i--;
 						}
 					}
 				}
@@ -97,7 +92,7 @@ public class TaskHandler
 						
 			try
 			{
-				Thread.sleep(15);
+				Thread.sleep(5);
 			}
 			catch (InterruptedException e)
 			{
@@ -107,6 +102,7 @@ public class TaskHandler
 		}
 	}
 	
+	/*
 	public static void main(String[] args)
 	{
 		TaskHandler handler = new TaskHandler();
@@ -152,4 +148,5 @@ public class TaskHandler
 			e.printStackTrace();
 		}
 	}
+	*/
 }
