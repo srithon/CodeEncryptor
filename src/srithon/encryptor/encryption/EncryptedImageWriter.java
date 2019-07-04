@@ -52,7 +52,7 @@ public class EncryptedImageWriter extends OutputStream
 	@Override
 	public void write(int b) throws IOException
 	{
-		raster[currentPixel++] = (0b11111111 & b);
+		raster[currentPixel++] = b;//(0b11111111 & b);
 		
 		/*
 		 * 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 1 1 1 0 0 1
@@ -68,4 +68,47 @@ public class EncryptedImageWriter extends OutputStream
 	{
 		ImageIO.write(image, outputFile.getName().substring(outputFile.getName().lastIndexOf('.') + 1), outputFile);
 	}
+	
+	public static int getARGB(int a, int r, int g, int b)
+	{
+		int argb = b;
+		argb |= (g << 8);
+		argb |= (r << 16);
+		argb |= (a << 24);
+		return argb;
+	}
+	
+	private static int getA(int argb)
+	{
+		return (argb & 0xFF000000) >> 24;
+	}
+	
+	private static int getR(int argb)
+	{
+		return (argb & 0x00FF0000) >> 16;
+	}
+	
+	private static int getG(int argb)
+	{
+		return (argb & 0x0000FF00) >> 8;
+	}
+	
+	private static int getB(int argb)
+	{
+		return argb & 0x000000FF;
+	}
+	
+	/*
+	public static void main(String[] args)
+	{
+		int argb = 0x12351357;
+		System.out.println(argb);
+		System.out.println(getA(argb));
+		System.out.println(getR(argb));
+		System.out.println(getG(argb));
+		System.out.println(getB(argb));
+		int a = 0x12, r = 0x35, g = 0x13, b = 0x57;
+		System.out.println(getARGB(a, r, g, b));
+	}
+	*/
 }

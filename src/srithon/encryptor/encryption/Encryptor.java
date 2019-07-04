@@ -64,9 +64,9 @@ public class Encryptor
 		
 		OutputStream writer = null;
 		
-		boolean isImage = false;
+		boolean isImage = Handler.isImage(outputPath.substring(outputPath.lastIndexOf('.') + 1));
 		
-		if (!(isImage = Handler.isImage(outputPath.substring(outputPath.lastIndexOf('.') + 1))))
+		if (!isImage)
 		{
 			try {
 				writer = new FileOutputStream(outputPath);//, StandardCharsets.UTF_8));
@@ -109,6 +109,8 @@ public class Encryptor
 				e.printStackTrace();
 			}
 		}
+		
+		System.out.println("Input Size: " + fileBytes.length + " bytes");
 		
 		byte[] iv = getIV();
 		
@@ -183,14 +185,81 @@ public class Encryptor
 			}
         }
         
-        for (int i = 0; i < cipherText.length - 16; i++)
+        if (isImage)
         {
-        	try {
-				writer.write((char) cipherText[i]);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+        	/*
+        	 * Do writing in blocks of 4
+        	 * Get 4 integers and then write the result
+        	 * of getARGB(...);
+        	 * When at the end, fill in missing with 0s
+        	 */
+            int cipherTextInd;
+            
+            for (cipherTextInd = 0; cipherTextInd < cipherText.length - 16; cipherTextInd+=4)
+            {
+            	try {
+    				writer.write(EncryptedImageWriter.getARGB(cipherText[cipherTextInd], cipherText[cipherTextInd+1], cipherText[cipherTextInd+2], cipherText[cipherTextInd+3]));
+    			} catch (IOException e) {
+    				e.printStackTrace();
+    			}
+            }
+            
+            /*
+             * 0 1 2 3 4 5 6 7 8 9 10 11 12 13 ... 45 46 47 48 49 50
+             * 0 -> 34 (non-inc)
+             * 0 -> 33 inclusive
+             * 0 4 8 12 16 20 24 28 32; 36
+             * remainder should be 1
+             * 50 - 17 - 32 = 1
+             */
+            
+            cipherTextInd -= 4;
+            
+            int remainder = cipherText.length - 17 - cipherTextInd;
+            
+            if (remainder > 0)
+            {
+            	int[] finalARGB = new int[3];
+            	finalARGB[0] = cipherText[cipherTextInd + 1];
+            	if (remainder > 1)
+            	{
+            		finalARGB[1] = cipherText[cipherTextInd + 2];
+            		if (remainder > 2)
+            		{
+            			finalARGB[2] = cipherText[cipherTextInd + 3];
+            		}
+            	}
+            	try
+            	{
+            		writer.write(EncryptedImageWriter.getARGB(finalARGB[0], finalARGB[1], finalARGB[2], 0));
+            	}
+            	catch (IOException e)
+            	{
+            		e.printStackTrace();
+            	}
+            }
+        }
+        else
+        {
+	        int currentIndexInCipherText;
+	        
+	        for (currentIndexInCipherText = 0; currentIndexInCipherText < cipherText.length - 16; currentIndexInCipherText++)
+	        {
+	        	/*
+	        	 * TODO
+	        	 * Do writing in blocks of 4
+	        	 * Get 4 integers and then write the result
+	        	 * of getARGB(...);
+	        	 * When at the end, fill in missing with 0s
+	        	 */
+	        	
+	        	try {
+					writer.write((char) cipherText[currentIndexInCipherText]);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        }
         }
         
         try {
