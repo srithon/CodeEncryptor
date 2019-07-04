@@ -2,6 +2,7 @@ package srithon.encryptor.encryption;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferInt;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -164,27 +165,74 @@ public class Encryptor
         	
         }
         
-        for (byte i : iv)
+        if (isImage)
         {
-        	try {
-				writer.write((char) i);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+        	int i = 0;
+        	while (i < iv.length)
+        	{
+        		int integerToWrite = (iv[i++] & 0xFF000000) >> 24;
+        		integerToWrite |= (iv[i++] & 0x00FF0000) >> 16;
+        		integerToWrite |= (iv[i++] & 0x0000FF00) >> 8;
+        		integerToWrite |= (iv[i++] & 0x000000FF);
+        		try {
+					writer.write(integerToWrite);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        	}
         }
+        else
+	        for (byte i : iv)
+	        {
+	        	try {
+					writer.write((char) i);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        }
         
-        display("TAG", Arrays.copyOfRange(cipherText, 0, 16));
+        display("ENCRYPTING TAG", Arrays.copyOfRange(cipherText, 0, 16));
         
-        for (int i = cipherText.length - 16; i < cipherText.length; i++)
+        if (isImage)
         {
-        	try {
-				writer.write((char) (cipherText[i] + 127));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+        	int i = cipherText.length - 16;
+        	/*
+        	 * TODO
+        	 * replace this with call to 
+        	 * EncryptedImageWriter.getARGB()
+        	 */
+        	while(i < cipherText.length)
+	        {
+        		int integerToWrite = (cipherText[i++] & 0xFF000000) >> 24;
+	    		integerToWrite |= (cipherText[i++] & 0x00FF0000) >> 16;
+	    		integerToWrite |= (cipherText[i++] & 0x0000FF00) >> 8;
+	    		integerToWrite |= (cipherText[i++] & 0x000000FF);
+	    		try {
+					writer.write((byte) (integerToWrite) + 127);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        	/*try {
+					writer.write((char) (cipherText[i] + 127));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}*/
+	        }
         }
+        else
+	        for (int i = cipherText.length - 16; i < cipherText.length; i++)
+	        {
+	        	try {
+					writer.write((char) (cipherText[i] + 127));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        }
         
         if (isImage)
         {
@@ -328,7 +376,21 @@ public class Encryptor
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			encrypted = ((DataBufferByte)(encryptedImage.getRaster().getDataBuffer())).getData();
+			BufferedImage encryptedImageCopy = new BufferedImage(encryptedImage.getWidth(), encryptedImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+			encryptedImageCopy.setData(encryptedImage.getData());
+			int[] encryptedIntegers = ((DataBufferInt)(encryptedImageCopy.getRaster().getDataBuffer())).getData();
+			encrypted = new byte[encryptedIntegers.length * 4];
+			int indexByteEncrypted = 0;
+			for (int i = 0; i < encryptedIntegers.length - 1;)
+			{
+				encrypted[indexByteEncrypted++] = (byte) encryptedIntegers[(i & 0xFF000000) >> 24];
+				encrypted[indexByteEncrypted++] = (byte) encryptedIntegers[(i & 0x00FF0000) >> 16];
+				encrypted[indexByteEncrypted++] = (byte) encryptedIntegers[(i & 0x0000FF00) >> 8];
+				encrypted[indexByteEncrypted++] = (byte) encryptedIntegers[(i & 0x000000FF)];
+			}
+			System.out.println("Index Byte Encrypted: " + indexByteEncrypted);
+			System.out.println("Length of Encrypted: " + encrypted.length);
+			System.out.println("Encrypted[0]: " + encrypted[0]);
 		}
 		else
 		{
@@ -386,7 +448,7 @@ public class Encryptor
         
         byte[] encryptedText = Arrays.copyOfRange(encrypted, 28, encrypted.length);
         
-        display("ENC", encryptedText);
+        //display("ENC", encryptedText);
         
         try
         {
