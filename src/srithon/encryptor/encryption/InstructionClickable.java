@@ -227,6 +227,7 @@ public class InstructionClickable extends HBox
 
 	public void removeSelfFromQueue()
 	{
+		System.out.println("Removing self from queue");
 		MainScene.getQueue().remove(MainScene.getQueue().indexOf(this));
 	}
 	
@@ -293,6 +294,7 @@ public class InstructionClickable extends HBox
 									}
 									else
 									{
+										System.out.println(objects.get(i) + " returned " + successes.get(i));
 										objects.get(i).setBackground((Boolean.TRUE.equals(successes.get(i)) ? successBackground : failureBackground));
 									}
 								}
@@ -324,6 +326,7 @@ public class InstructionClickable extends HBox
 									}
 									else
 									{
+										System.out.println(objects.get(i) + " returned " + successes.get(i));
 										objects.get(i).setBackground((Boolean.TRUE.equals(successes.get(i)) ? successBackground : failureBackground));
 									}
 								}
@@ -363,8 +366,9 @@ public class InstructionClickable extends HBox
 					{
 						public void execute()
 						{
-							for (int i = 0; i < objects.size(); i++)
+							for (int i = objects.size() - 1; i > -1; i--)
 							{
+								System.out.println(objects.get(i) + " returned " + successes.get(i));
 								if (successes.get(i) == null || Boolean.TRUE.equals(successes.get(i)))
 								{
 									objects.get(i).removeSelfFromQueue();
