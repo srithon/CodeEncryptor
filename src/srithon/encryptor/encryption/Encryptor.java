@@ -1,5 +1,6 @@
 package srithon.encryptor.encryption;
 
+import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -315,12 +316,29 @@ public class Encryptor
         //key = null;
         
         byte[] encrypted = null;
-		try {
-			encrypted = Files.readAllBytes(Path.of(encPath));
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			return false;
+        
+		boolean isImage = Handler.isImage(encPath.substring(encPath.lastIndexOf('.') + 1));
+        
+		if (isImage)
+		{
+			BufferedImage encryptedImage = null;
+			try {
+				encryptedImage = ImageIO.read(new File(encPath));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			encrypted = ((DataBufferByte)(encryptedImage.getRaster().getDataBuffer())).getData();
+		}
+		else
+		{
+			try {
+				encrypted = Files.readAllBytes(Path.of(encPath));
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				return false;
+			}
 		}
 		
 		byte[] iv = Arrays.copyOfRange(encrypted, 0, 12);
