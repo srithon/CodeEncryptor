@@ -5,6 +5,7 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
@@ -17,11 +18,54 @@ public class CircularReadWriteTest
 {
 	public static void main(String[] args)
 	{
-		argbTest();
+		actualARGBTest();
+	}
+	
+	/*
+	 * Write bytes to an ARGB image
+	 * and attempt to retrieve the same
+	 * bytes from the output
+	 */
+	private static void actualARGBTest()
+	{
+		byte[] originalData = new byte[20000];
+		new Random().nextBytes(originalData);
+		
+		int[] convertedData = new int[originalData.length / 4];
+		int currentIndexInData = 0;
+		for (int i = 0; i < convertedData.length; i++)
+		{
+			convertedData[i] = ((originalData[currentIndexInData++] & 0xFF) << 24);
+			convertedData[i] |= ((originalData[currentIndexInData++] & 0xFF) << 16);
+			convertedData[i] |= ((originalData[currentIndexInData++] & 0xFF) << 8);
+			convertedData[i] |= ((originalData[currentIndexInData++] & 0xFF));
+			//why the hell does & 0xFF fix problems?
+			//bytes are supposed to be 8 bits??
+		}
+		System.out.println(Arrays.toString(Arrays.copyOf(originalData, 20)));
+		byte[] recoveredData = new byte[convertedData.length * 4];
+		int recDatInd = 0;
+		for (int i = 0; i < convertedData.length; i++)
+		{
+			recoveredData[recDatInd++] = (byte) ((convertedData[i] & 0xFF000000) >> 24);
+			recoveredData[recDatInd++] = (byte) ((convertedData[i] & 0x00FF0000) >> 16);
+			recoveredData[recDatInd++] = (byte) ((convertedData[i] & 0x0000FF00) >> 8);
+			recoveredData[recDatInd++] = (byte)  (convertedData[i] & 0x000000FF);
+		}
+		/*
+		 * x = FF99FF55
+		 * 1111_1111	1001_1001	1111_1111	0101_0101
+		 * a)	(x & 0xFF000000) >> 24
+		 * b) 	(x & 0x00FF0000) >> 16
+		 * c)	(x & 0x0000FF00) >> 8
+		 * d)	(x & 0x000000FF)
+		 */
+		System.out.println(Arrays.toString(Arrays.copyOf(recoveredData, 20)));
+		
 	}
 	
 	// originally intended to be for argb, but decided on type byte gray
-	private static void argbTest()
+	private static void largerScaleByteTest()
 	{
 		//fill byte array with random bytes
 		byte[] data = new byte[400];
