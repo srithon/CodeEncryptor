@@ -35,12 +35,12 @@ public class CircularReadWriteTest
 		int currentIndexInData = 0;
 		for (int i = 0; i < convertedData.length; i++)
 		{
-			convertedData[i] = ((originalData[currentIndexInData++] & 0xFF) << 24);
-			convertedData[i] |= ((originalData[currentIndexInData++] & 0xFF) << 16);
-			convertedData[i] |= ((originalData[currentIndexInData++] & 0xFF) << 8);
-			convertedData[i] |= ((originalData[currentIndexInData++] & 0xFF));
+			convertedData[i] =  (originalData[currentIndexInData++] & 0xFF) << 24;
+			convertedData[i] |= (originalData[currentIndexInData++] & 0xFF) << 16;
+			convertedData[i] |= (originalData[currentIndexInData++] & 0xFF) << 8;
+			convertedData[i] |=  originalData[currentIndexInData++] & 0xFF;
 			//why the hell does & 0xFF fix problems?
-			//bytes are supposed to be 8 bits??
+			//bytes are supposed to be 8 bits anyway so this shouldn't do anything??
 		}
 		System.out.println(Arrays.toString(Arrays.copyOf(originalData, 20)));
 		byte[] recoveredData = new byte[convertedData.length * 4];
@@ -52,6 +52,7 @@ public class CircularReadWriteTest
 			recoveredData[recDatInd++] = (byte) ((convertedData[i] & 0x0000FF00) >> 8);
 			recoveredData[recDatInd++] = (byte)  (convertedData[i] & 0x000000FF);
 		}
+		
 		/*
 		 * x = FF99FF55
 		 * 1111_1111	1001_1001	1111_1111	0101_0101
@@ -60,7 +61,70 @@ public class CircularReadWriteTest
 		 * c)	(x & 0x0000FF00) >> 8
 		 * d)	(x & 0x000000FF)
 		 */
+		//this is proof that recovering works
 		System.out.println(Arrays.toString(Arrays.copyOf(recoveredData, 20)));
+		
+		BufferedImage encodedImage = new BufferedImage(100, 50, BufferedImage.TYPE_INT_ARGB);
+		int[] encodedRaster = ((DataBufferInt) encodedImage.getRaster().getDataBuffer()).getData();
+		
+		System.out.println("Encoded raster length: " + encodedRaster.length);
+		System.out.println("Converted data length: " + convertedData.length);
+		
+		for (int i = 0; i < convertedData.length; i++)
+			encodedRaster[i] = convertedData[i];
+		//write the encodedImage to file
+		File encodedFile = new File("testIO\\testR\\CircularReadWrite.png");
+		try
+		{
+			ImageIO.write(encodedImage, "png", encodedFile);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			return;
+		}
+		
+		BufferedImage readImage = null;
+		try
+		{
+			readImage = ImageIO.read(encodedFile);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			return;
+		}
+		
+		byte[] readRaster = ((DataBufferByte) readImage.getRaster().getDataBuffer()).getData();
+		for (int i = 1; i < readRaster.length - 2; i+=4)
+		{
+			byte t = readRaster[i];
+			readRaster[i] = readRaster[i + 2];
+			readRaster[i + 2] = t;
+		}
+		// every other byte is wrong?
+		/*
+		 * For some wonky reason, have to swap every pair of even indices
+		 */
+		
+		System.out.println(Arrays.toString(Arrays.copyOf(originalData, 30)));
+		System.out.println(Arrays.toString(Arrays.copyOf(readRaster, 30)));
+		
+		for (int i = 0; i < originalData.length; i++)
+		{
+			if (originalData[i] != readRaster[i])
+			{
+				int start = i - 4;
+				int end = i + 4;
+				if (end > originalData.length - 1)
+					end = originalData.length - 1;
+				
+				System.out.println("Discrepancy at i = " + i);
+				System.out.println(Arrays.toString(Arrays.copyOfRange(originalData, start, end)));
+				System.out.println(Arrays.toString(Arrays.copyOfRange(readRaster, start, end)));
+				System.out.println();
+			}
+		}
 		
 	}
 	

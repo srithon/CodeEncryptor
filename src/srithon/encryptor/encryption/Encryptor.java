@@ -170,9 +170,9 @@ public class Encryptor
         	int i = 0;
         	while (i < iv.length)
         	{
-        		int integerToWrite = (iv[i++] & 0xFF000000) >> 24;
-        		integerToWrite |= (iv[i++] & 0x00FF0000) >> 16;
-        		integerToWrite |= (iv[i++] & 0x0000FF00) >> 8;
+        		int integerToWrite = (iv[i++] >> 24) & 0xFF000000;
+        		integerToWrite |= (iv[i++] >> 16) & 0x00FF0000;
+        		integerToWrite |= (iv[i++] >> 8) & 0x0000FF00;
         		integerToWrite |= (iv[i++] & 0x000000FF);
         		try {
 					writer.write(integerToWrite);
@@ -205,9 +205,9 @@ public class Encryptor
         	 */
         	while(i < cipherText.length)
 	        {
-        		int integerToWrite = (cipherText[i++] & 0xFF000000) >> 24;
-	    		integerToWrite |= (cipherText[i++] & 0x00FF0000) >> 16;
-	    		integerToWrite |= (cipherText[i++] & 0x0000FF00) >> 8;
+        		int integerToWrite = (cipherText[i++] >> 24) & 0xFF000000;
+	    		integerToWrite |= (cipherText[i++] >> 16) & 0x00FF0000;
+	    		integerToWrite |= (cipherText[i++] >> 8) & 0x0000FF00;
 	    		integerToWrite |= (cipherText[i++] & 0x000000FF);
 	    		try {
 					writer.write((byte) (integerToWrite) + 127);

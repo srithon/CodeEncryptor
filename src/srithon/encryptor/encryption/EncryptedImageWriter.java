@@ -71,10 +71,10 @@ public class EncryptedImageWriter extends OutputStream
 	
 	public static int getARGB(int a, int r, int g, int b)
 	{
-		int argb = b;
-		argb |= (g << 8);
-		argb |= (r << 16);
-		argb |= (a << 24);
+		int argb = b & 0xFF;
+		argb |= (g << 8) & 0xFF00;
+		argb |= (r << 16) & 0xFF0000;
+		argb |= (a << 24) & 0xFF000000;
 		return argb;
 	}
 	
