@@ -25,6 +25,8 @@ public class Encryptor
 {
 	private static final int GCM_TAG_LENGTH = 128;
 	
+	private static byte[] encryptedCipherText;
+	
 	public static void encrypt(String filePath, String outputPath, SecretKeySpec key, Boolean doCheckSum)
 	{
 		filePath = filePath.trim();
@@ -170,9 +172,9 @@ public class Encryptor
         	int i = 0;
         	while (i < iv.length)
         	{
-        		int integerToWrite = (iv[i++] >> 24) & 0xFF000000;
-        		integerToWrite |= (iv[i++] >> 16) & 0x00FF0000;
-        		integerToWrite |= (iv[i++] >> 8) & 0x0000FF00;
+        		int integerToWrite = (iv[i++] << 24) & 0xFF000000;
+        		integerToWrite |= (iv[i++] << 16) & 0x00FF0000;
+        		integerToWrite |= (iv[i++] << 8) & 0x0000FF00;
         		integerToWrite |= (iv[i++] & 0x000000FF);
         		try {
 					writer.write(integerToWrite);
@@ -186,31 +188,32 @@ public class Encryptor
 	        for (byte i : iv)
 	        {
 	        	try {
-					writer.write((char) i);
+					writer.write(i);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 	        }
         
-        display("ENCRYPTING TAG", Arrays.copyOfRange(cipherText, 0, 16));
+        display("ENCRYPTING TAG", Arrays.copyOfRange(cipherText, cipherText.length - 16, cipherText.length));
         
         if (isImage)
         {
         	int i = cipherText.length - 16;
+        	// [-16, -15, -14, -13], [-12 ... -9], [-8 ... -5], [-4 ... -1]
         	/*
         	 * TODO
         	 * replace this with call to 
         	 * EncryptedImageWriter.getARGB()
         	 */
-        	while(i < cipherText.length)
+        	while(i < cipherText.length - 1)
 	        {
-        		int integerToWrite = (cipherText[i++] >> 24) & 0xFF000000;
-	    		integerToWrite |= (cipherText[i++] >> 16) & 0x00FF0000;
-	    		integerToWrite |= (cipherText[i++] >> 8) & 0x0000FF00;
-	    		integerToWrite |= (cipherText[i++] & 0x000000FF);
+        		int integerToWrite = (cipherText[i++] & 0xFF) << 24;//) & 0xFF000000;
+	    		integerToWrite |= (cipherText[i++] & 0xFF) << 16;//) &    0x00FF0000;
+	    		integerToWrite |= (cipherText[i++] & 0xFF) << 8;//) &     0x0000FF00;
+	    		integerToWrite |= (cipherText[i++] & 0xFF);//          0x000000FF);
 	    		try {
-					writer.write((byte) (integerToWrite) + 127);
+					writer.write(integerToWrite); // + 127
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -268,7 +271,7 @@ public class Encryptor
             
             if (remainder > 0)
             {
-            	int[] finalARGB = new int[3];
+            	byte[] finalARGB = new byte[3];
             	finalARGB[0] = cipherText[cipherTextInd + 1];
             	if (remainder > 1)
             	{
@@ -280,7 +283,7 @@ public class Encryptor
             	}
             	try
             	{
-            		writer.write(EncryptedImageWriter.getARGB(finalARGB[0], finalARGB[1], finalARGB[2], 0));
+            		writer.write(EncryptedImageWriter.getARGB(finalARGB[0], finalARGB[1], finalARGB[2], (byte) 0));
             	}
             	catch (IOException e)
             	{
@@ -317,6 +320,8 @@ public class Encryptor
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+        
+        Encryptor.encryptedCipherText = cipherText;
         
         //return cipherText;
     }
@@ -366,31 +371,31 @@ public class Encryptor
         byte[] encrypted = null;
         
 		boolean isImage = Handler.isImage(encPath.substring(encPath.lastIndexOf('.') + 1));
+		BufferedImage encryptedImage = null;
         
 		if (isImage)
 		{
-			BufferedImage encryptedImage = null;
 			try {
 				encryptedImage = ImageIO.read(new File(encPath));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			BufferedImage encryptedImageCopy = new BufferedImage(encryptedImage.getWidth(), encryptedImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
-			encryptedImageCopy.setData(encryptedImage.getData());
-			int[] encryptedIntegers = ((DataBufferInt)(encryptedImageCopy.getRaster().getDataBuffer())).getData();
-			encrypted = new byte[encryptedIntegers.length * 4];
-			int indexByteEncrypted = 0;
-			for (int i = 0; i < encryptedIntegers.length - 1;)
+			
+			encrypted = ((DataBufferByte) encryptedImage.getRaster().getDataBuffer()).getData();
+			
+			for (int i = 1; i < encrypted.length - 2; i+=4)
 			{
-				encrypted[indexByteEncrypted++] = (byte) encryptedIntegers[(i & 0xFF000000) >> 24];
-				encrypted[indexByteEncrypted++] = (byte) encryptedIntegers[(i & 0x00FF0000) >> 16];
-				encrypted[indexByteEncrypted++] = (byte) encryptedIntegers[(i & 0x0000FF00) >> 8];
-				encrypted[indexByteEncrypted++] = (byte) encryptedIntegers[(i & 0x000000FF)];
+				byte t = encrypted[i];
+				encrypted[i] = encrypted[i + 2];
+				encrypted[i + 2] = t;
 			}
-			System.out.println("Index Byte Encrypted: " + indexByteEncrypted);
-			System.out.println("Length of Encrypted: " + encrypted.length);
-			System.out.println("Encrypted[0]: " + encrypted[0]);
+			
+			System.out.println("First 50 read bytes: " + Arrays.toString(Arrays.copyOf(encrypted, 50)));
+			// every other byte is wrong?
+			/*
+			 * For some wonky reason, have to swap every pair of even indices
+			 */
 		}
 		else
 		{
@@ -408,19 +413,20 @@ public class Encryptor
 	    
 	    display("TAG", tag);
 	    
-	    for (int i = 0; i < tag.length; i++)
-	    {
-	    	if (tag[i] < 0)
-	    	{
-				tag[i] = (byte) (256 + (tag[i] - 127));
-	    	}
-			else
-			{
-				tag[i] = (byte) (tag[i] - 127);
-			}
-	    	
-	    	encrypted[i] = tag[i];
-	    }
+	    if (!isImage)
+		    for (int i = 0; i < tag.length; i++)
+		    {
+		    	if (tag[i] < 0)
+		    	{
+					tag[i] = (byte) (256 + (tag[i] - 127));
+		    	}
+				else
+				{
+					tag[i] = (byte) (tag[i] - 127);
+				}
+		    	
+		    	encrypted[i] = tag[i];
+		    }
 	    
 	    display("IV", iv);
 	    display("TAG", tag);
@@ -448,6 +454,22 @@ public class Encryptor
         
         byte[] encryptedText = Arrays.copyOfRange(encrypted, 28, encrypted.length);
         
+        for (int i = 0; i < Encryptor.encryptedCipherText.length; i++)
+		{
+			if (Encryptor.encryptedCipherText[i] != encrypted[i])
+			{
+				int start = i;
+				int end = i + 4;
+				if (end > Encryptor.encryptedCipherText.length - 1)
+					end = Encryptor.encryptedCipherText.length - 1;
+				
+				System.out.println("Discrepancy at i = " + i);
+				System.out.println(Arrays.toString(Arrays.copyOfRange(Encryptor.encryptedCipherText, start, end)));
+				System.out.println(Arrays.toString(Arrays.copyOfRange(encrypted, start, end)));
+				System.out.println();
+			}
+		}
+        
         //display("ENC", encryptedText);
         
         try
@@ -464,31 +486,34 @@ public class Encryptor
         
         File outputFile = new File(decPath);
         
-        BufferedWriter writer = null;
-        
-        try {
-			writer = new BufferedWriter(new FileWriter(outputFile));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        
-        for (byte b : decrypted)
+        if (isImage)
         {
-        	try {
-				writer.write((char) b);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+        	try
+        	{
+        		EncryptedImageWriter writer = new EncryptedImageWriter(encPath, decPath);
+        		for (byte b : decrypted)
+                	writer.write(b);
+        		writer.close();
+        	}
+        	catch (IOException e)
+        	{
+        		e.printStackTrace();
+        	}
         }
-        
-        try {
-			writer.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        else
+        {
+        	try
+        	{
+	        	BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
+	        	for (byte b : decrypted)
+	            	writer.write(b);
+	    		writer.close();
+        	}
+        	catch (IOException e)
+        	{
+        		e.printStackTrace();
+        	}
+        }
         
         return true;
 	}

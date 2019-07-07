@@ -66,15 +66,15 @@ public class EncryptedImageWriter extends OutputStream
 	@Override
 	public void close() throws IOException
 	{
-		ImageIO.write(image, outputFile.getName().substring(outputFile.getName().lastIndexOf('.') + 1), outputFile);
+		ImageIO.write(image, "png", outputFile);
 	}
 	
-	public static int getARGB(int a, int r, int g, int b)
+	public static int getARGB(byte a, byte r, byte g, byte b)
 	{
-		int argb = b & 0xFF;
-		argb |= (g << 8) & 0xFF00;
-		argb |= (r << 16) & 0xFF0000;
-		argb |= (a << 24) & 0xFF000000;
+		int argb = (a & 0xFF) << 24;
+		argb |= (r & 0xFF) << 16;
+		argb |= (g & 0xFF) << 8;
+		argb |=  b & 0xFF;
 		return argb;
 	}
 	
