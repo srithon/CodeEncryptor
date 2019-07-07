@@ -25,6 +25,17 @@ public class CircularReadWriteTest
 	 * Write bytes to an ARGB image
 	 * and attempt to retrieve the same
 	 * bytes from the output
+	 * 
+	 * Writing Data
+	 * 1) Get original data
+	 * 2) Convert byte data into ints (4 bytes/int) using bitwise functions
+	 * 3) Load converted integer data into BufferedImage raster
+	 * 4) Write image to file using ImageIO.write(image, "png", outputFile)
+	 * 
+	 * Recovering
+	 * 1) Read image into BufferedImage with ImageIO.read
+	 * 2) Get image data and do magical swapping thing
+	 * 3) Profit
 	 */
 	private static void actualARGBTest()
 	{
